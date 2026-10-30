@@ -5,7 +5,7 @@ self.addEventListener('activate', (event) => event.waitUntil(self.clients.claim(
 self.addEventListener('push', (event) => {
   let data = {};
   try { data = event.data ? event.data.json() : {}; } catch (e) { data = { title: 'Tidy Nest', body: event.data ? event.data.text() : '' }; }
-  const title = data.title || 'Tidy Nest';
+  const title = data.title || 'Shopify';
   event.waitUntil(
     self.registration.showNotification(title, {
       body: data.body || '',
