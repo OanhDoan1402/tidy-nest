@@ -34,7 +34,7 @@ export default function LineChart({ cur, prev, labels, format = (v) => String(Ma
           </div>
           <div aria-hidden="true" style={{ position: 'relative', height: 18, fontSize: 12, color: 'var(--muted)' }}>
             {xl.map(({ l, i }) => (
-              <span key={i} style={{ position: 'absolute', left: `${(x(i) / W) * 100}%`, transform: i === 0 ? 'none' : i === labels.length - 1 ? 'translateX(-100%)' : 'translateX(-50%)', whiteSpace: 'nowrap' }}>{l}</span>
+              <span key={i} className={i === 0 || i === labels.length - 1 ? undefined : 'xl-mid'} style={{ position: 'absolute', left: `${(x(i) / W) * 100}%`, transform: i === 0 ? 'none' : i === labels.length - 1 ? 'translateX(-100%)' : 'translateX(-50%)', whiteSpace: 'nowrap' }}>{l}</span>
             ))}
           </div>
         </div>

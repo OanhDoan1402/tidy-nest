@@ -10,6 +10,7 @@ const I = {
   inventory: 'M3 10 12 4l9 6v10H3zM7 20v-6h10v6M7 17h10',
   inbox: 'M4 5h16v11H9l-5 4z',
   analytics: 'M4 20V10M10 20V4M16 20v-7M22 20H2',
+  settings: 'M12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6zM12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1',
 };
 
 const ITEMS = [
@@ -19,6 +20,7 @@ const ITEMS = [
   ['/admin/inventory', 'Inventory', 'inventory'],
   ['/admin/inbox', 'Inbox', 'inbox'],
   ['/admin/analytics', 'Analytics', 'analytics'],
+  ['/admin/settings', 'Settings', 'settings'],
 ];
 
 function Icon({ name, size = 20 }) {
@@ -49,7 +51,7 @@ export function SideNav({ counts }) {
 
 export function MobileTabs({ counts }) {
   const path = usePathname();
-  const tabs = ITEMS.filter(([, , icon]) => icon !== 'inventory');
+  const tabs = ITEMS.filter(([, , icon]) => icon !== 'inventory' && icon !== 'settings');
   return (
     <nav className="mobile-tabs" aria-label="Admin sections">
       {tabs.slice(0, 5).map(([href, label, icon]) => (

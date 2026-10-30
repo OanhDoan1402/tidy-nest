@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { db } from '@/lib/supabase/admin';
-import { fulfillOrders } from '@/app/admin/actions';
+import { fulfillOrders, createTestOrder } from '@/app/admin/actions';
 import { PayPill, FulPill } from '@/components/admin/Pills';
 import SelectAll from '@/components/admin/SelectAll';
 import AutoRefresh from '@/components/admin/AutoRefresh';
@@ -31,7 +31,7 @@ export default async function Orders({ searchParams }) {
 
   let query = supabase
     .from('orders')
-    .select('id, number, customer_name, email, total, payment_status, fulfillment_status, created_at, order_items(quantity)')
+    .select('id, number, customer_name, email, total, payment_status, fulfillment_status, created_at, is_sample, order_items(quantity)')
     .order('created_at', { ascending: !desc })
     .limit(200);
   query = applyView(query, view);
@@ -49,6 +49,9 @@ export default async function Orders({ searchParams }) {
       <AutoRefresh seconds={20} />
       <div className="page-head">
         <h1>Orders</h1>
+        <form action={createTestOrder} className="right">
+          <button className="btn btn-ghost" type="submit" title="Adds one order marked as sample data. No notification is sent.">Create test order</button>
+        </form>
       </div>
 
       <section className="card" style={{ overflow: 'hidden' }}>
@@ -91,7 +94,7 @@ export default async function Orders({ searchParams }) {
                   return (
                     <tr key={o.id}>
                       <td><input type="checkbox" name="ids" value={o.id} aria-label={`Select order ${o.number}`} style={{ width: 18, height: 18, accentColor: '#1E6B57' }} /></td>
-                      <td><Link href={`/admin/orders/${o.id}`} style={{ fontWeight: 700 }}>#{o.number}</Link></td>
+                      <td style={{ whiteSpace: 'nowrap' }}><Link href={`/admin/orders/${o.id}`} style={{ fontWeight: 700 }}>#{o.number}</Link>{o.is_sample && <span className="pill pill-mute" style={{ marginLeft: 6, fontSize: 11, padding: '1px 7px' }}>Sample</span>}</td>
                       <td className="muted" style={{ whiteSpace: 'nowrap' }}>{dateTime(o.created_at)}</td>
                       <td>{o.customer_name}</td>
                       <td><PayPill s={o.payment_status} /></td>

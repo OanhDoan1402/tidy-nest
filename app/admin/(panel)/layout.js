@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import Logo from '@/components/Logo';
 import SignOut from '@/components/admin/SignOut';
+import RegisterSW from '@/components/admin/RegisterSW';
 import { SideNav, MobileTabs } from '@/components/admin/Nav';
 import { requireAdmin } from '@/lib/auth';
 import { db } from '@/lib/supabase/admin';
@@ -41,6 +42,7 @@ export default async function AdminLayout({ children }) {
           <Logo size={30} />
           <strong style={{ flex: 1 }}>{STORE_NAME}</strong>
           <Link href="/admin/inventory" style={{ color: '#C9D1CD', fontSize: 13 }}>Inventory</Link>
+          <Link href="/admin/settings" style={{ color: '#C9D1CD', fontSize: 13 }}>Settings</Link>
           <SignOut style={{ minHeight: 34, padding: '0 10px', fontSize: 13 }} />
         </div>
         <main className="admin-main">
@@ -55,6 +57,7 @@ export default async function AdminLayout({ children }) {
         </main>
       </div>
       <MobileTabs counts={counts} />
+      <RegisterSW />
     </div>
   );
 }

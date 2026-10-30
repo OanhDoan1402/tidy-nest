@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/supabase/admin';
+import { notify } from '@/lib/push';
+import { money } from '@/lib/format';
 
 const clip = (v, n) => String(v || '').trim().slice(0, n);
 
@@ -27,5 +29,12 @@ export async function POST(req) {
     const msg = /left of|no longer available|empty/.test(error.message) ? error.message : 'Could not place the order. Please try again.';
     return NextResponse.json({ error: msg }, { status: 400 });
   }
+  const count = items.reduce((a, i) => a + i.quantity, 0);
+  await notify('order', {
+    title: `New order #${data.number}`,
+    body: `${money(data.total)} · ${count} ${count === 1 ? 'item' : 'items'} · ${customer.name}`,
+    url: `/admin/orders/${data.id}`,
+    tag: `order-${data.number}`,
+  });
   return NextResponse.json(data);
 }

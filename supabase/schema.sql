@@ -92,6 +92,35 @@ alter table public.orders add column if not exists is_sample boolean not null de
 alter table public.conversations add column if not exists is_sample boolean not null default false;
 alter table public.page_views add column if not exists is_sample boolean not null default false;
 
+-- ---------- Phone notifications (phase 2) ----------
+create table if not exists public.push_subscriptions (
+  id uuid primary key default gen_random_uuid(),
+  endpoint text unique not null,
+  p256dh text not null,
+  auth text not null,
+  label text,
+  prefs jsonb not null default '{"orders": true, "updates": false, "chats": true, "chatMode": "first", "practice": true, "quiet": false}'::jsonb,
+  created_at timestamptz not null default now()
+);
+
+-- ---------- Practice mode (phase 2) ----------
+create table if not exists public.practice_sessions (
+  id uuid primary key default gen_random_uuid(),
+  status text not null default 'running' check (status in ('running', 'paused', 'ended')),
+  freq text not null default 'mid' check (freq in ('low', 'mid', 'high')),
+  diff text not null default 'mixed' check (diff in ('easy', 'mixed', 'hard')),
+  next_at timestamptz not null default now(),
+  started_at timestamptz not null default now(),
+  paused_at timestamptz,
+  paused_seconds integer not null default 0,
+  ended_at timestamptz,
+  feedback jsonb
+);
+alter table public.conversations add column if not exists is_practice boolean not null default false;
+alter table public.conversations add column if not exists practice_session_id uuid references public.practice_sessions(id) on delete cascade;
+alter table public.conversations add column if not exists persona jsonb;
+alter table public.conversations add column if not exists ai_pending_at timestamptz;
+
 -- ---------- Security ----------
 -- All reads and writes go through the website's server with the service key,
 -- so the public (anon) key cannot read or change any table directly.
@@ -101,6 +130,8 @@ alter table public.order_items enable row level security;
 alter table public.conversations enable row level security;
 alter table public.messages enable row level security;
 alter table public.page_views enable row level security;
+alter table public.push_subscriptions enable row level security;
+alter table public.practice_sessions enable row level security;
 
 -- ---------- Place an order (checks stock and updates it in one step) ----------
 create or replace function public.create_order(payload jsonb)
@@ -136,9 +167,9 @@ begin
 
   ship := case when sub >= 50 then 0 else 5.99 end;
 
-  insert into public.orders (customer_name, email, phone, address1, city, state, zip, note, subtotal, shipping, total)
+  insert into public.orders (customer_name, email, phone, address1, city, state, zip, note, subtotal, shipping, total, is_sample)
   values (c->>'name', c->>'email', c->>'phone', c->>'address1', c->>'city', c->>'state', c->>'zip',
-          payload->>'note', sub, ship, sub + ship)
+          payload->>'note', sub, ship, sub + ship, coalesce((payload->>'sample')::boolean, false))
   returning * into new_order;
 
   for it in select * from jsonb_array_elements(payload->'items') loop

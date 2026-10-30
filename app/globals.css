@@ -156,3 +156,5 @@ table.t tr:hover td { background: #FAFBF9; }
   .admin-top-mobile { display: flex !important; }
 }
 .admin-top-mobile { display: none; align-items: center; gap: 10px; background: var(--ink); color: #fff; padding: 12px 14px; }
+
+@media (max-width: 640px) { .xl-mid { display: none; } }

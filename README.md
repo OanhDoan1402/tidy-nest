@@ -6,7 +6,7 @@
 - **Trang quản trị (/admin):** có đăng nhập, gồm các mục Home, Orders, Products (thêm, sửa, tải ảnh), Inventory, Inbox và Analytics.
 - **Dữ liệu:** lưu trên Supabase. Trang web chạy trên Vercel.
 
-Đợt 2 sẽ thêm thông báo đẩy về điện thoại và Practice mode nối AI.
+Đợt 2 (đã có trong bản này): thông báo đẩy về điện thoại, Practice mode với khách do AI đóng vai, và nút tạo đơn thử.
 
 ---
 
@@ -21,10 +21,10 @@
 1. Bấm **New project**. Đặt tên (ví dụ `tidy-nest`), tạo mật khẩu database và lưu lại, chọn Region **East US (North Virginia)**, rồi bấm **Create new project**. Chờ khoảng 1 đến 2 phút.
 2. Ở menu trái, vào **SQL Editor** rồi bấm **New query**.
 3. Mở file `supabase/schema.sql` trong thư mục này, copy toàn bộ nội dung, dán vào ô truy vấn và bấm **Run**. Khi thấy "Success" là xong: các bảng và 12 sản phẩm mẫu đã được tạo.
-4. Vào **Project Settings → API** (hoặc **Data API / API Keys**) và chép lại 3 giá trị:
-   - **Project URL**, có dạng `https://xxxx.supabase.co`
-   - **anon public** key
-   - **service_role** key: **giữ bí mật**, không gửi cho ai và không đưa lên chỗ công khai.
+4. Chép lại 3 giá trị:
+   - **Project URL**, có dạng `https://xxxx.supabase.co`: nằm ở **Project Settings → Data API** (hoặc nút **Connect** ở đầu trang).
+   - **Khóa công khai**: vào **Project Settings → API Keys**. Nếu có tab **Legacy API Keys** thì lấy khóa `anon`. Nếu không có tab đó thì lấy **Publishable key** (bắt đầu bằng `sb_publishable_`).
+   - **Khóa bí mật**: cùng trang đó. Lấy khóa `service_role` ở tab Legacy, hoặc **Secret key** (bắt đầu bằng `sb_secret_`). **Giữ bí mật**, không gửi cho ai và không đưa lên chỗ công khai.
 5. **(Tùy chọn) Nạp dữ liệu mẫu để luyện tập:** mở thêm một **New query**, dán toàn bộ file `supabase/sample-data.sql` rồi bấm **Run**. Lệnh này tạo khoảng 1.000 đơn hàng, hơn 20.000 lượt truy cập trong 60 ngày gần nhất và vài cuộc chat mẫu, để trang Home và Analytics có số liệu như bản thiết kế. Mọi dữ liệu mẫu đều được đánh dấu riêng, và trang admin sẽ hiện thông báo "Sample data" chừng nào dữ liệu mẫu còn trong database. Bấm **Remove sample data** trên thông báo đó là xóa sạch.
 6. Tạo tài khoản đăng nhập admin: vào **Authentication → Users → Add user → Create new user**. Nhập email và mật khẩu của bạn, đánh dấu **Auto Confirm User**, rồi bấm **Create user**.
 
@@ -99,3 +99,28 @@ npm run dev
 ```
 
 Sau đó mở http://localhost:3000.
+
+---
+
+## Cập nhật lên đợt 2
+
+Nếu web đợt 1 của bạn đã chạy, làm theo các bước sau:
+
+1. **Cập nhật database:** vào Supabase → **SQL Editor** → **New query**, dán lại toàn bộ file `supabase/schema.sql` mới rồi bấm **Run**. File này chạy lại nhiều lần vẫn an toàn và không làm mất dữ liệu.
+2. **Thay code trên GitHub:** mở repo `tidy-nest`, bấm **Add file → Upload files**, kéo thả tất cả các mục bên trong thư mục `tidy-nest` mới, rồi bấm **Commit changes**. File trùng tên sẽ được ghi đè. Vercel tự deploy lại sau khoảng 1 đến 2 phút.
+3. **Bật thông báo:**
+   - Vào `link-web/admin/settings`. Trang sẽ hiện 2 dòng `NEXT_PUBLIC_VAPID_PUBLIC_KEY=...` và `VAPID_PRIVATE_KEY=...`. Copy cả hai.
+   - Vào Vercel → **Settings → Environment Variables**, dán 2 dòng đó vào ô Key, bấm **Save**.
+   - Vào tab **Deployments**, bấm **⋯** ở bản mới nhất, chọn **Redeploy**.
+4. **Bật thông báo trên iPhone:**
+   - Mở web app Tidy Nest từ biểu tượng trên Màn hình chính. Phải mở từ biểu tượng, không mở trong tab Safari.
+   - Vào **Settings**, chọn loại thông báo muốn nhận, bấm **Turn on notifications** rồi chọn **Cho phép**.
+   - Bấm **Send test notification** để thử.
+5. **(Tùy chọn) Khách AI cho Practice mode:**
+   - Vào https://aistudio.google.com/app/apikey, bấm **Create API key** và copy khóa.
+   - Thêm vào Vercel với Key là `GEMINI_API_KEY`, rồi **Redeploy**.
+   - Nếu không có khóa này, Practice mode vẫn chạy được, nhưng khách nói theo kịch bản có sẵn.
+
+**Cách dùng Practice mode:** vào **Inbox**, chọn tần suất và kiểu khách, bấm **Start practice session**. Khách mới sẽ nhắn đến ngẫu nhiên trong lúc trang Inbox đang mở. Bấm **End session** để xem bảng nhận xét. Bấm **Clear practice chats** để xóa các cuộc chat luyện tập.
+
+**Nút Create test order** (trang Orders) tạo 1 đơn có nhãn Sample và không gửi thông báo. Dùng nó để tập xử lý đơn.

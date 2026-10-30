@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/supabase/admin';
+import { notify } from '@/lib/push';
 
 const clip = (v, n) => String(v || '').trim().slice(0, n);
 
@@ -30,17 +31,19 @@ export async function POST(req) {
       .single();
     if (error) return NextResponse.json({ error: 'Could not start the chat.' }, { status: 500 });
     await supabase.from('messages').insert({ conversation_id: conv.id, sender: 'customer', body: text });
+    await notify('chat_first', { title: name, body: text, url: `/admin/inbox?c=${conv.id}`, tag: `chat-${conv.id}` });
     return NextResponse.json({ id: conv.id, token: conv.token, messages: await thread(supabase, conv.id) });
   }
 
   if (b.action === 'send') {
     const { data: conv } = await supabase
-      .from('conversations').select('id, token').eq('id', b.id).maybeSingle();
+      .from('conversations').select('id, token, customer_name').eq('id', b.id).maybeSingle();
     if (!conv || conv.token !== b.token) return NextResponse.json({ error: 'Chat not found.' }, { status: 404 });
     await supabase.from('messages').insert({ conversation_id: conv.id, sender: 'customer', body: text });
     await supabase.from('conversations')
       .update({ unread_admin: true, status: 'open', last_message_at: new Date().toISOString() })
       .eq('id', conv.id);
+    await notify('chat', { title: conv.customer_name, body: text, url: `/admin/inbox?c=${conv.id}`, tag: `chat-${conv.id}` });
     return NextResponse.json({ messages: await thread(supabase, conv.id) });
   }
 
